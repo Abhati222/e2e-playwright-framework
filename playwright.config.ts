@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-
+import { ConfigManager } from 'src/config/ConfigManager';
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -9,30 +9,17 @@ import { defineConfig, devices } from '@playwright/test';
 // dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 export default defineConfig({
-  testDir: 'src/tests/',
+  testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  workers: ConfigManager.getWorkers(),
+  reporter: [['html', {open: 'never'}]],
   use: {
-     baseURL: 'http://localhost:3000',
-     trace: 'on-first-retry',
+    baseURL: ConfigManager.getBaseUrl(),
+    headless: ConfigManager.isHeadless(),
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    trace: 'retain-on-failure',
   },
-
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-  ]});
+});
